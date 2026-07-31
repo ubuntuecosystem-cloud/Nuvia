@@ -14,9 +14,16 @@ export default function Home() {
       }}
     >
       <div style={{ textAlign: "center" }}>
-        <h1 style={{ fontSize: 40 }}>Entry System</h1>
+        <h1 style={{ fontSize: 40 }}>
+          Entry System
+        </h1>
 
-        <p style={{ opacity: 0.7, marginTop: 10 }}>
+        <p
+          style={{
+            opacity: 0.7,
+            marginTop: 10,
+          }}
+        >
           Presence • Relationship • Continuity
         </p>
 
