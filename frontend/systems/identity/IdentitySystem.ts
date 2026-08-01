@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { profileIdentitySystem } from "./ProfileIdentitySystem";
 
 export type IdentityStatus =
   | "initializing"
@@ -9,7 +10,8 @@ export type SessionStatus =
   | "unauthenticated";
 
 class IdentitySystem {
-  private status: IdentityStatus = "initializing";
+  private status: IdentityStatus =
+    "initializing";
 
   private sessionStatus: SessionStatus =
     "unauthenticated";
@@ -21,24 +23,36 @@ class IdentitySystem {
       data: { session },
     } = await supabase.auth.getSession();
 
-    if (session?.user) {
-      this.sessionStatus = "authenticated";
-      this.userId = session.user.id;
-    }
+    this.updateSession(session);
 
     supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (session?.user) {
-          this.sessionStatus = "authenticated";
-          this.userId = session.user.id;
-        } else {
-          this.sessionStatus = "unauthenticated";
-          this.userId = null;
-        }
+        this.updateSession(session);
       }
     );
 
     this.status = "ready";
+  }
+
+  private updateSession(session: any) {
+    if (session?.user) {
+      this.sessionStatus =
+        "authenticated";
+
+      this.userId =
+        session.user.id;
+
+      profileIdentitySystem.connect(
+        session.user.id
+      );
+    } else {
+      this.sessionStatus =
+        "unauthenticated";
+
+      this.userId = null;
+
+      profileIdentitySystem.disconnect();
+    }
   }
 
   getStatus(): IdentityStatus {
