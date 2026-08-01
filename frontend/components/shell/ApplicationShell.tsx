@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { identitySystem } from "@/systems/identity/IdentitySystem";
+import { authenticationService } from "@/services/auth/AuthenticationService";
 
 export default function ApplicationShell() {
   const [userId, setUserId] = useState<string | null>(
     null
   );
+
+  async function handleSignOut() {
+    await authenticationService.signOut();
+
+    window.location.reload();
+  }
 
   useEffect(() => {
     setUserId(identitySystem.getUserId());
@@ -26,20 +33,40 @@ export default function ApplicationShell() {
       <header
         style={{
           padding: 20,
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          borderBottom:
+            "1px solid rgba(255,255,255,0.1)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <h1>
-          Application Shell
-        </h1>
+        <div>
+          <h1>
+            Application Shell
+          </h1>
 
-        <p
+          <p
+            style={{
+              opacity: 0.7,
+            }}
+          >
+            Identity connected
+          </p>
+        </div>
+
+        <button
+          onClick={handleSignOut}
           style={{
-            opacity: 0.7,
+            padding: "10px 16px",
+            borderRadius: 8,
+            background: "transparent",
+            color: "white",
+            border:
+              "1px solid rgba(255,255,255,0.5)",
           }}
         >
-          Identity connected
-        </p>
+          Sign Out
+        </button>
       </header>
 
       <section
