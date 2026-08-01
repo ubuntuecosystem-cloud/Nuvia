@@ -11,6 +11,8 @@ export default function Home() {
   const [mode, setMode] = useState<EntryMode>("entry");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] =
+    useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] =
@@ -156,20 +158,46 @@ export default function Home() {
               }}
             />
 
-            <input
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+            <div
               style={{
-                width: "100%",
+                display: "flex",
                 marginTop: 10,
-                padding: 12,
-                borderRadius: 8,
+                gap: 8,
               }}
-            />
+            >
+              <input
+                placeholder="Password"
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                style={{
+                  flex: 1,
+                  padding: 12,
+                  borderRadius: 8,
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(!showPassword)
+                }
+                style={{
+                  padding: "0 12px",
+                  borderRadius: 8,
+                }}
+              >
+                {showPassword
+                  ? "Hide"
+                  : "Show"}
+              </button>
+            </div>
 
             <button
               disabled={loading}
