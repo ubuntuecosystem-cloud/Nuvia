@@ -44,6 +44,36 @@ class AuthenticationService {
     }
   }
 
+  async requestPasswordReset(
+    email: string
+  ) {
+    const { data, error } =
+      await supabase.auth.resetPasswordForEmail(
+        email
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+  async updatePassword(
+    password: string
+  ) {
+    const { data, error } =
+      await supabase.auth.updateUser({
+        password,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
   async getSession() {
     const { data, error } =
       await supabase.auth.getSession();
