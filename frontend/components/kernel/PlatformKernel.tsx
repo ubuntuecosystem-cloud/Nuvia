@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { identitySystem } from "@/systems/identity/IdentitySystem";
 
 type PlatformState = "initializing" | "ready";
 
@@ -15,6 +16,8 @@ export function PlatformKernel({
     useState<PlatformState>("initializing");
 
   useEffect(() => {
+    identitySystem.initialize();
+
     setState("ready");
   }, []);
 
