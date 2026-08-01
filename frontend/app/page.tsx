@@ -1,11 +1,62 @@
 "use client";
 
 import { useState } from "react";
+import { authenticationService } from "@/services/auth/AuthenticationService";
 
 type EntryMode = "entry" | "signin" | "signup";
 
 export default function Home() {
   const [mode, setMode] = useState<EntryMode>("entry");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSignIn() {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      await authenticationService.signIn(
+        email,
+        password
+      );
+
+      setMessage("Signed in successfully");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Sign in failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreateAccount() {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      await authenticationService.createAccount(
+        email,
+        password
+      );
+
+      setMessage(
+        "Account created. Check email verification if required."
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Account creation failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <main
@@ -67,35 +118,90 @@ export default function Home() {
           </>
         )}
 
-        {mode === "signin" && (
+        {(mode === "signin" || mode === "signup") && (
           <>
-            <h1>Sign In</h1>
+            <h1>
+              {mode === "signin"
+                ? "Sign In"
+                : "Create Account"}
+            </h1>
+
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              style={{
+                width: "100%",
+                marginTop: 20,
+                padding: 12,
+                borderRadius: 8,
+              }}
+            />
+
+            <input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              style={{
+                width: "100%",
+                marginTop: 10,
+                padding: 12,
+                borderRadius: 8,
+              }}
+            />
 
             <button
-              onClick={() => setMode("entry")}
+              disabled={loading}
+              onClick={
+                mode === "signin"
+                  ? handleSignIn
+                  : handleCreateAccount
+              }
               style={{
                 marginTop: 20,
+                width: "100%",
+                padding: 12,
+                borderRadius: 8,
+                background: "white",
+                color: "black",
+                border: "none",
+              }}
+            >
+              {loading
+                ? "Processing..."
+                : mode === "signin"
+                ? "Sign In"
+                : "Create Account"}
+            </button>
+
+            <button
+              onClick={() => {
+                setMode("entry");
+                setMessage("");
+              }}
+              style={{
+                marginTop: 10,
                 padding: 10,
               }}
             >
               Back
             </button>
-          </>
-        )}
 
-        {mode === "signup" && (
-          <>
-            <h1>Create Account</h1>
-
-            <button
-              onClick={() => setMode("entry")}
-              style={{
-                marginTop: 20,
-                padding: 10,
-              }}
-            >
-              Back
-            </button>
+            {message && (
+              <p
+                style={{
+                  marginTop: 20,
+                  opacity: 0.8,
+                }}
+              >
+                {message}
+              </p>
+            )}
           </>
         )}
       </div>
