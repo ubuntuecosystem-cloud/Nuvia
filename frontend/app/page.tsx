@@ -5,16 +5,31 @@ import { authenticationService } from "@/services/auth/AuthenticationService";
 import { identitySystem } from "@/systems/identity/IdentitySystem";
 import ApplicationShell from "@/components/shell/ApplicationShell";
 
-type EntryMode = "entry" | "signin" | "signup";
+type EntryMode =
+  | "entry"
+  | "signin"
+  | "signup"
+  | "forgot";
 
 export default function Home() {
-  const [mode, setMode] = useState<EntryMode>("entry");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [mode, setMode] =
+    useState<EntryMode>("entry");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
   const [showPassword, setShowPassword] =
     useState(false);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
   const [authenticated, setAuthenticated] =
     useState(false);
 
@@ -66,6 +81,29 @@ export default function Home() {
         error instanceof Error
           ? error.message
           : "Account creation failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      await authenticationService.requestPasswordReset(
+        email
+      );
+
+      setMessage(
+        "Password reset email sent."
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Password reset failed"
       );
     } finally {
       setLoading(false);
@@ -136,12 +174,16 @@ export default function Home() {
           </>
         )}
 
-        {(mode === "signin" || mode === "signup") && (
+        {(mode === "signin" ||
+          mode === "signup" ||
+          mode === "forgot") && (
           <>
             <h1>
               {mode === "signin"
                 ? "Sign In"
-                : "Create Account"}
+                : mode === "signup"
+                ? "Create Account"
+                : "Reset Password"}
             </h1>
 
             <input
@@ -158,53 +200,55 @@ export default function Home() {
               }}
             />
 
-            <div
-              style={{
-                display: "flex",
-                marginTop: 10,
-                gap: 8,
-              }}
-            >
-              <input
-                placeholder="Password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
+            {mode !== "forgot" && (
+              <div
                 style={{
-                  flex: 1,
-                  padding: 12,
-                  borderRadius: 8,
-                }}
-              />
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
-                style={{
-                  padding: "0 12px",
-                  borderRadius: 8,
+                  display: "flex",
+                  marginTop: 10,
+                  gap: 8,
                 }}
               >
-                {showPassword
-                  ? "Hide"
-                  : "Show"}
-              </button>
-            </div>
+                <input
+                  placeholder="Password"
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  style={{
+                    flex: 1,
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPassword(
+                      !showPassword
+                    )
+                  }
+                >
+                  {showPassword
+                    ? "Hide"
+                    : "Show"}
+                </button>
+              </div>
+            )}
 
             <button
               disabled={loading}
               onClick={
                 mode === "signin"
                   ? handleSignIn
-                  : handleCreateAccount
+                  : mode === "signup"
+                  ? handleCreateAccount
+                  : handleForgotPassword
               }
               style={{
                 marginTop: 20,
@@ -213,15 +257,29 @@ export default function Home() {
                 borderRadius: 8,
                 background: "white",
                 color: "black",
-                border: "none",
               }}
             >
               {loading
                 ? "Processing..."
                 : mode === "signin"
                 ? "Sign In"
-                : "Create Account"}
+                : mode === "signup"
+                ? "Create Account"
+                : "Send Reset Email"}
             </button>
+
+            {mode === "signin" && (
+              <button
+                onClick={() =>
+                  setMode("forgot")
+                }
+                style={{
+                  marginTop: 10,
+                }}
+              >
+                Forgot Password?
+              </button>
+            )}
 
             <button
               onClick={() => {
@@ -230,7 +288,6 @@ export default function Home() {
               }}
               style={{
                 marginTop: 10,
-                padding: 10,
               }}
             >
               Back
