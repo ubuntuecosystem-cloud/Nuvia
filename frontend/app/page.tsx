@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { authenticationService } from "@/services/auth/AuthenticationService";
-import { identitySystem } from "@/systems/identity/IdentitySystem";
+import { useState } from "react";
+
+import {
+  usePlatformState,
+} from "@/components/kernel/PlatformKernel";
+
+import {
+  authenticationService,
+} from "@/services/auth/AuthenticationService";
+
 import ApplicationShell from "@/components/shell/ApplicationShell";
 
 type EntryMode =
@@ -12,6 +19,11 @@ type EntryMode =
   | "forgot";
 
 export default function Home() {
+  const {
+    state,
+    authenticated,
+  } = usePlatformState();
+
   const [mode, setMode] =
     useState<EntryMode>("entry");
 
@@ -30,16 +42,6 @@ export default function Home() {
   const [loading, setLoading] =
     useState(false);
 
-  const [authenticated, setAuthenticated] =
-    useState(false);
-
-  useEffect(() => {
-    setAuthenticated(
-      identitySystem.getSessionStatus() ===
-        "authenticated"
-    );
-  }, []);
-
   async function handleSignIn() {
     setLoading(true);
     setMessage("");
@@ -50,8 +52,12 @@ export default function Home() {
         password
       );
 
-      setAuthenticated(true);
-      setMessage("Signed in successfully");
+      setMessage(
+        "Signed in successfully"
+      );
+
+      window.location.reload();
+
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -76,6 +82,7 @@ export default function Home() {
       setMessage(
         "Account created. Check email verification if required."
       );
+
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -99,6 +106,7 @@ export default function Home() {
       setMessage(
         "Password reset email sent."
       );
+
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -108,6 +116,23 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (state === "initializing") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0b0b0f",
+          color: "white",
+        }}
+      >
+        Initializing Identity...
+      </main>
+    );
   }
 
   if (authenticated) {
@@ -132,6 +157,7 @@ export default function Home() {
           textAlign: "center",
         }}
       >
+
         {mode === "entry" && (
           <>
             <h1 style={{ fontSize: 40 }}>
@@ -143,30 +169,26 @@ export default function Home() {
             </p>
 
             <button
-              onClick={() => setMode("signin")}
+              onClick={() =>
+                setMode("signin")
+              }
               style={{
                 marginTop: 30,
                 width: "100%",
                 padding: 12,
-                borderRadius: 8,
-                background: "transparent",
-                color: "white",
-                border: "1px solid white",
               }}
             >
               Sign In
             </button>
 
             <button
-              onClick={() => setMode("signup")}
+              onClick={() =>
+                setMode("signup")
+              }
               style={{
                 marginTop: 10,
                 width: "100%",
                 padding: 12,
-                borderRadius: 8,
-                background: "white",
-                color: "black",
-                border: "none",
               }}
             >
               Create Account
@@ -196,7 +218,6 @@ export default function Home() {
                 width: "100%",
                 marginTop: 20,
                 padding: 12,
-                borderRadius: 8,
               }}
             />
 
@@ -204,8 +225,8 @@ export default function Home() {
               <div
                 style={{
                   display: "flex",
-                  marginTop: 10,
                   gap: 8,
+                  marginTop: 10,
                 }}
               >
                 <input
@@ -217,17 +238,17 @@ export default function Home() {
                   }
                   value={password}
                   onChange={(e) =>
-                    setPassword(e.target.value)
+                    setPassword(
+                      e.target.value
+                    )
                   }
                   style={{
                     flex: 1,
                     padding: 12,
-                    borderRadius: 8,
                   }}
                 />
 
                 <button
-                  type="button"
                   onClick={() =>
                     setShowPassword(
                       !showPassword
@@ -254,9 +275,6 @@ export default function Home() {
                 marginTop: 20,
                 width: "100%",
                 padding: 12,
-                borderRadius: 8,
-                background: "white",
-                color: "black",
               }}
             >
               {loading
@@ -282,10 +300,9 @@ export default function Home() {
             )}
 
             <button
-              onClick={() => {
-                setMode("entry");
-                setMessage("");
-              }}
+              onClick={() =>
+                setMode("entry")
+              }
               style={{
                 marginTop: 10,
               }}
@@ -300,6 +317,7 @@ export default function Home() {
             )}
           </>
         )}
+
       </div>
     </main>
   );
