@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { authenticationService } from "@/services/auth/AuthenticationService";
 import { identitySystem } from "@/systems/identity/IdentitySystem";
+import ApplicationShell from "@/components/shell/ApplicationShell";
 
 type EntryMode = "entry" | "signin" | "signup";
 
@@ -70,27 +71,7 @@ export default function Home() {
   }
 
   if (authenticated) {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0b0b0f",
-          color: "white",
-          fontFamily: "system-ui",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <h1>Application Shell</h1>
-
-          <p style={{ opacity: 0.7 }}>
-            Authenticated session active
-          </p>
-        </div>
-      </main>
-    );
+    return <ApplicationShell />;
   }
 
   return (
