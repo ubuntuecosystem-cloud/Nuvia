@@ -1,11 +1,31 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
 import { identitySystem } from "@/systems/identity/IdentitySystem";
 
-type PlatformState = "initializing" | "ready";
+type PlatformState =
+  | "initializing"
+  | "ready"
+  | "error";
 
-const PlatformContext = createContext<PlatformState>("initializing");
+type PlatformContextType = {
+  state: PlatformState;
+  userId: string | null;
+  authenticated: boolean;
+};
+
+const PlatformContext =
+  createContext<PlatformContextType>({
+    state: "initializing",
+    userId: null,
+    authenticated: false,
+  });
 
 export function PlatformKernel({
   children,
@@ -13,16 +33,55 @@ export function PlatformKernel({
   children: React.ReactNode;
 }) {
   const [state, setState] =
-    useState<PlatformState>("initializing");
+    useState<PlatformState>(
+      "initializing"
+    );
+
+  const [userId, setUserId] =
+    useState<string | null>(null);
+
+  const [authenticated, setAuthenticated] =
+    useState(false);
 
   useEffect(() => {
-    identitySystem.initialize();
+    async function boot() {
+      try {
+        await identitySystem.initialize();
 
-    setState("ready");
+        const currentUserId =
+          identitySystem.getUserId();
+
+        const sessionStatus =
+          identitySystem.getSessionStatus();
+
+        setUserId(currentUserId);
+
+        setAuthenticated(
+          sessionStatus === "authenticated"
+        );
+
+        setState("ready");
+      } catch (error) {
+        console.error(
+          "Platform initialization failed:",
+          error
+        );
+
+        setState("error");
+      }
+    }
+
+    boot();
   }, []);
 
   return (
-    <PlatformContext.Provider value={state}>
+    <PlatformContext.Provider
+      value={{
+        state,
+        userId,
+        authenticated,
+      }}
+    >
       {children}
     </PlatformContext.Provider>
   );
