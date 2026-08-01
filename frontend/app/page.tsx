@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authenticationService } from "@/services/auth/AuthenticationService";
+import { identitySystem } from "@/systems/identity/IdentitySystem";
 
 type EntryMode = "entry" | "signin" | "signup";
 
@@ -11,6 +12,15 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authenticated, setAuthenticated] =
+    useState(false);
+
+  useEffect(() => {
+    setAuthenticated(
+      identitySystem.getSessionStatus() ===
+        "authenticated"
+    );
+  }, []);
 
   async function handleSignIn() {
     setLoading(true);
@@ -22,6 +32,7 @@ export default function Home() {
         password
       );
 
+      setAuthenticated(true);
       setMessage("Signed in successfully");
     } catch (error) {
       setMessage(
@@ -56,6 +67,30 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (authenticated) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0b0b0f",
+          color: "white",
+          fontFamily: "system-ui",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <h1>Application Shell</h1>
+
+          <p style={{ opacity: 0.7 }}>
+            Authenticated session active
+          </p>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -193,12 +228,7 @@ export default function Home() {
             </button>
 
             {message && (
-              <p
-                style={{
-                  marginTop: 20,
-                  opacity: 0.8,
-                }}
-              >
+              <p style={{ marginTop: 20 }}>
                 {message}
               </p>
             )}
