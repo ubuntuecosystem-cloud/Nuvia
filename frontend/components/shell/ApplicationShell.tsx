@@ -1,23 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { identitySystem } from "@/systems/identity/IdentitySystem";
+import { usePlatformState } from "@/components/kernel/PlatformKernel";
 import { authenticationService } from "@/services/auth/AuthenticationService";
 
 export default function ApplicationShell() {
-  const [userId, setUserId] = useState<string | null>(
-    null
-  );
+  const {
+    userId,
+  } = usePlatformState();
 
   async function handleSignOut() {
     await authenticationService.signOut();
 
     window.location.reload();
   }
-
-  useEffect(() => {
-    setUserId(identitySystem.getUserId());
-  }, []);
 
   return (
     <main
