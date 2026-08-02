@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { profileIdentitySystem } from "./ProfileIdentitySystem";
 
 export type IdentityStatus =
   | "initializing"
@@ -58,10 +57,6 @@ class IdentitySystem {
       this.userId =
         session.user.id;
 
-      profileIdentitySystem.connect(
-        session.user.id
-      );
-
       return;
     }
 
@@ -69,8 +64,6 @@ class IdentitySystem {
       "unauthenticated";
 
     this.userId = null;
-
-    profileIdentitySystem.disconnect();
   }
 
   getStatus(): IdentityStatus {
@@ -92,12 +85,11 @@ class IdentitySystem {
     this.initialized = false;
 
     this.status = "initializing";
+
     this.sessionStatus =
       "unauthenticated";
 
     this.userId = null;
-
-    profileIdentitySystem.disconnect();
   }
 }
 
