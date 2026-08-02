@@ -8,6 +8,10 @@ import {
   identityPersistenceService,
 } from "@/services/identity/IdentityPersistenceService";
 
+import {
+  personPersistenceService,
+} from "@/services/person/PersonPersistenceService";
+
 
 export type IdentityStatus =
   | "initializing"
@@ -65,7 +69,6 @@ class IdentitySystem {
     );
 
 
-
     const {
       data: {
         subscription,
@@ -103,7 +106,6 @@ class IdentitySystem {
     session: any
   ) {
 
-
     if (
       session?.user
     ) {
@@ -114,6 +116,12 @@ class IdentitySystem {
 
       await identityPersistenceService
         .ensureIdentity(
+          userId
+        );
+
+
+      await personPersistenceService
+        .ensurePerson(
           userId
         );
 
@@ -132,6 +140,7 @@ class IdentitySystem {
 
 
       return;
+
     }
 
 
@@ -154,6 +163,7 @@ class IdentitySystem {
     IdentityStatus {
 
     return this.status;
+
   }
 
 
@@ -162,6 +172,7 @@ class IdentitySystem {
     SessionStatus {
 
     return this.sessionStatus;
+
   }
 
 
@@ -170,6 +181,7 @@ class IdentitySystem {
     string | null {
 
     return this.userId;
+
   }
 
 
@@ -200,6 +212,7 @@ class IdentitySystem {
 
 
     profileIdentitySystem.disconnect();
+
   }
 
 }
