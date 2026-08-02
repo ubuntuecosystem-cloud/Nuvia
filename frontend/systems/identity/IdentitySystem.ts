@@ -4,27 +4,38 @@ import {
   profileIdentitySystem,
 } from "./ProfileIdentitySystem";
 
+import {
+  identityPersistenceService,
+} from "@/services/identity/IdentityPersistenceService";
+
+
 export type IdentityStatus =
   | "initializing"
   | "ready";
 
+
 export type SessionStatus =
   | "authenticated"
   | "unauthenticated";
+
 
 class IdentitySystem {
 
   private status: IdentityStatus =
     "initializing";
 
+
   private sessionStatus: SessionStatus =
     "unauthenticated";
+
 
   private userId: string | null =
     null;
 
+
   private initialized =
     false;
+
 
   private authSubscription:
     | {
@@ -32,11 +43,14 @@ class IdentitySystem {
       }
     | null = null;
 
+
+
   async initialize() {
 
     if (this.initialized) {
       return;
     }
+
 
     const {
       data: {
@@ -45,7 +59,12 @@ class IdentitySystem {
     } =
       await supabase.auth.getSession();
 
-    this.updateSession(session);
+
+    await this.updateSession(
+      session
+    );
+
+
 
     const {
       data: {
@@ -53,57 +72,83 @@ class IdentitySystem {
       },
     } =
       supabase.auth.onAuthStateChange(
-        (
+        async (
           _event,
           session
         ) => {
 
-          this.updateSession(
+          await this.updateSession(
             session
           );
 
         }
       );
 
+
     this.authSubscription =
       subscription;
 
+
     this.status =
       "ready";
+
 
     this.initialized =
       true;
   }
 
-  private updateSession(
+
+
+  private async updateSession(
     session: any
   ) {
+
 
     if (
       session?.user
     ) {
 
+      const userId =
+        session.user.id;
+
+
+      await identityPersistenceService
+        .ensureIdentity(
+          userId
+        );
+
+
       this.sessionStatus =
         "authenticated";
 
+
       this.userId =
-        session.user.id;
+        userId;
+
 
       profileIdentitySystem.connect(
-        session.user.id
+        userId
       );
+
 
       return;
     }
 
+
+
     this.sessionStatus =
       "unauthenticated";
+
 
     this.userId =
       null;
 
+
     profileIdentitySystem.disconnect();
+
   }
+
+
 
   getStatus():
     IdentityStatus {
@@ -111,11 +156,15 @@ class IdentitySystem {
     return this.status;
   }
 
+
+
   getSessionStatus():
     SessionStatus {
 
     return this.sessionStatus;
   }
+
+
 
   getUserId():
     string | null {
@@ -123,28 +172,38 @@ class IdentitySystem {
     return this.userId;
   }
 
+
+
   destroy() {
 
     this.authSubscription?.unsubscribe();
 
+
     this.authSubscription =
       null;
+
 
     this.initialized =
       false;
 
+
     this.status =
       "initializing";
+
 
     this.sessionStatus =
       "unauthenticated";
 
+
     this.userId =
       null;
 
+
     profileIdentitySystem.disconnect();
   }
+
 }
+
 
 export const identitySystem =
   new IdentitySystem();
